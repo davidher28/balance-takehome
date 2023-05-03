@@ -1,4 +1,4 @@
-# Balance Takehome
+# Balance Takehome 💰
 
 Balance Takehome is a prototype GraphQL API to connect with the [merge.dev](https://merge.dev/) Unified API to access and retrieve ```Accounting``` data from common models like ```Company Info```, ```Accounts``` and ```Transactions```.
 
