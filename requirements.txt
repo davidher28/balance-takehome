@@ -1,0 +1,23 @@
+alembic==1.6.5
+aniso8601==8.0.0
+appdirs==1.4.4
+APScheduler==3.8.0
+asgiref==3.4.1
+black @ git+https://github.com/psf/black
+fastapi @ git+https://github.com/tiangolo/fastapi
+graphene==3.0b7
+graphene-sqlalchemy==3.0.0b1
+graphql-core==3.1.2
+graphql-relay==3.0
+isort @ git+https://github.com/PyCQA/isort
+sqlmodel @ git+https://github.com/tiangolo/sqlmodel
+SQLAlchemy==1.4.20
+starlette==0.26.1
+starlette-graphene3 @ git+https://github.com/ciscorn/starlette-graphene3
+MergeAccountingClient @ git+https://github.com/merge-api/merge-accounting-python.git
+mypy @ git+https://github.com/python/mypy.git
+pytest==6.2.5
+psycopg2==2.9.6
+pydantic==1.10.0
+uvicorn==0.18.0
+uvicorn[standard]
