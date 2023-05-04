@@ -16,6 +16,10 @@ cd balance-takehome
 docker-compose up --build
 ```
 
+- Access pgAdmin to verify the schema creation and the ingested data:
+
+![alt text](https://github.com/davidher28/balance-takehome/blob/main/static/pgAdmin2.png)
+
 - Access GraphiQL (In-Browser GraphQL IDE) through http://localhost:8000/graphql and execute the following queries:
 
 ```bash
@@ -106,8 +110,9 @@ docker exec balance_takehome_app alembic upgrade head
 
 ### Entity–relationship model
 
+![alt text](https://github.com/davidher28/balance-takehome/blob/main/static/ER-Model.png)
 
 ### Architecture
 
-
+![alt text](https://github.com/davidher28/balance-takehome/blob/main/static/architecture.png)
 
