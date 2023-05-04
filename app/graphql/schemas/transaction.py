@@ -4,7 +4,7 @@ from graphene import DateTime, Float, List, ObjectType, String, Union
 
 
 class Transaction(ObjectType):
-    date = DateTime()
+    transaction_date = DateTime()
     name = String()
     transaction_to = String()
     transaction_from = String()

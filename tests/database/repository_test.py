@@ -1,4 +1,4 @@
-from app.database.repository import CompanyRepository
+from tests.fixtures import create_test_company
 
 
 def test_company(create_test_company):

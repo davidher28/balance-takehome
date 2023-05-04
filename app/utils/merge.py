@@ -1,10 +1,6 @@
 from datetime import datetime
-from pprint import pprint
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, Union
 
-from app.database.repository import (AccountRepository, CompanyRepository,
-                                     SyncStatusRepository,
-                                     TransactionRepository)
 from app.services.merge import MergeAccounting
 from app.settings import settings
 from app.utils import BaseUtil
@@ -24,7 +20,7 @@ class MergeSyncUtil(BaseUtil):
     @staticmethod
     def data_paginator(request: Callable, params: dict = {}) -> Iterator[dict]:
         """
-        Generator function to paginate through Merge API results.
+        Generator function to paginate and lazy load Merge API results.
         """
         next_cursor = "next"
         while next_cursor:
@@ -32,6 +28,12 @@ class MergeSyncUtil(BaseUtil):
             for result in response["results"]:
                 yield result
             next_cursor = params["cursor"] = response["next"]
+
+    def build_data_paginator_params(self, request_method: Callable) -> dict:
+        params: dict[str, Union[Callable, dict]] = {"request": request_method}
+        if self.last_sync_date:
+            params |= {"params": {"modified_after": self.last_sync_date}}
+        return params
 
     def company_values_coercer(self, company_values: list[dict]) -> list[dict]:
         return [
@@ -71,17 +73,17 @@ class MergeSyncUtil(BaseUtil):
             {
                 "created_at": datetime.now(),
                 "modified_at": transaction_info["modified_at"],
-                "name": transaction_info["name"],
+                "name": transaction_info["number"],
                 "remote_id": transaction_info["id"],
                 "transaction_date": transaction_info["transaction_date"],
                 "transaction_to": transaction_info["contact"],
-                "transaction_from": transaction_info["status"],
+                "transaction_from": transaction_info["contact"],
                 "amount": transaction_info["total_amount"],
                 "currency": transaction_info["currency"],
                 "account_id": transaction_info["account"],
-                "company_id": settings.sandbox_company_remote_id,
             }
             for transaction_info in transaction_values
+            if transaction_info["account"]
         ]
 
     def sync_companies(self) -> None:
@@ -100,19 +102,19 @@ class MergeSyncUtil(BaseUtil):
         """
         Accounts Polling Process
         """
-        params = {"request": self.accounting_client.get_accounts}
-        if self.last_sync_date:
-            params |= {"params": {"modified_after": self.last_sync_date}}
+        params = self.build_data_paginator_params(
+            request_method=self.accounting_client.get_accounts
+        )
         newest_accounts = list(self.data_paginator(**params))
         coerced_values = self.account_values_coercer(account_values=newest_accounts)
         self.account_repository.add_batch(coerced_values)
 
     def sync_transactions(self) -> None:
-        params = {"request": self.accounting_client.get_transactions}
-        if self.last_sync_date:
-            params |= {"params": {"modified_after": self.last_sync_date}}
+        params = self.build_data_paginator_params(
+            request_method=self.accounting_client.get_transactions
+        )
         newest_transactions = list(self.data_paginator(**params))
         coerced_values = self.transaction_values_coercer(
-            account_values=newest_transactions
+            transaction_values=newest_transactions
         )
         self.transaction_repository.add_batch(coerced_values)

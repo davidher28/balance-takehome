@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 from sqlmodel import Session, SQLModel, create_engine
 
-from app.database import engine
+from app.database.session import engine
 from app.settings import settings
 
 

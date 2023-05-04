@@ -1,7 +1,10 @@
 from graphene import Date, Field, Int, List, ObjectType
 
-from app.graphql.schemas.balance_breakdown import (BalanceBreakdown,
-                                                   BankAccount, DateTimeType)
+from app.graphql.schemas.balance_breakdown import (
+    BalanceBreakdown,
+    BankAccount,
+    DateTimeType,
+)
 from app.graphql.schemas.income_and_expenses import IncomeExpenses
 from app.graphql.schemas.transaction import TransactionsList
 from app.utils.formatter import FormatterUtil

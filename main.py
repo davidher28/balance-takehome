@@ -38,8 +38,8 @@ async def ingestion_process():
     sync_util = MergeSyncUtil()
     sync_util.sync_companies()
     sync_util.sync_accounts()
-    # sync_util.sync_transactions()
-    # sync_util.sync_status_repository.add()
+    sync_util.sync_transactions()
+    sync_util.sync_status_repository.add()
 
 
 """

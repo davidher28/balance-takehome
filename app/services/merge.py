@@ -1,35 +1,42 @@
 from datetime import datetime
-from pprint import pprint
-from typing import Callable, Iterator, Optional
+from typing import Optional, Union
 
-import MergeAccountingClient
-from MergeAccountingClient import ApiException
-from MergeAccountingClient.api import (accounts_api, company_info_api,
-                                       expenses_api, income_statements_api,
-                                       sync_status_api, transactions_api)
-
-from app.settings import settings
+from MergeAccountingClient import ApiClient, ApiException, Configuration
+from MergeAccountingClient.api import accounts_api, company_info_api, transactions_api
 
 
 class MergeAccounting:
     """
-    Service Class that allows communication with merge.dev and their synced data using the MergeAccountingClient SDK.
+    Service Class that allows communication with merge.dev and the synced data, using the MergeAccountingClient SDK.
     """
 
     def __init__(
         self, accounting_auth_key: str, x_account_token: str, remote_company_id: str
     ):
-        config = MergeAccountingClient.Configuration()
+        config = Configuration()
         config.api_key_prefix["tokenAuth"] = "Bearer"
         config.api_key["tokenAuth"] = accounting_auth_key
-        self._accounting_client = MergeAccountingClient.ApiClient(config)
+        self._accounting_client = ApiClient(config)
         self._x_account_token = x_account_token
         self._remote_company_id = remote_company_id
 
-    def get_companies(self, modified_after: Optional[datetime] = None) -> dict:
-        company_params = {"x_account_token": self._x_account_token}
+    def build_query_params(
+        self, modified_after: Optional[datetime] = None, cursor: Optional[str] = None
+    ) -> dict:
+        params: dict[str, Union[str, datetime]] = {
+            "x_account_token": self._x_account_token
+        }
         if modified_after:
-            company_params |= {"modified_after": modified_after}
+            params |= {"modified_after": modified_after}
+        if cursor:
+            params |= {"cursor": cursor}
+        return params
+
+    def get_companies(self, modified_after: Optional[datetime] = None) -> dict:
+        """
+        Companies retrieval service using the CompanyInfoApi implementation from merge.dev
+        """
+        company_params = self.build_query_params(modified_after=modified_after)
         try:
             api_response = company_info_api.CompanyInfoApi(
                 self._accounting_client
@@ -44,46 +51,36 @@ class MergeAccounting:
         self, modified_after: Optional[datetime] = None, cursor: Optional[str] = None
     ) -> dict:
         """
-        TODO: doc
+        Accounts retrieval service using the AccountsApi implementation from merge.dev
         """
-        accounts_params = {"x_account_token": self._x_account_token}
-        if modified_after:
-            accounts_params |= {"modified_after": modified_after}
-        if cursor:
-            accounts_params |= {"cursor": cursor}
+        accounts_params = self.build_query_params(
+            modified_after=modified_after, cursor=cursor
+        )
         try:
             api_response = accounts_api.AccountsApi(
                 self._accounting_client
             ).accounts_list(**accounts_params)
         except ApiException as e:
-            api_response = {
-                "error": f"Exception when calling AccountsApi->accounts_list: {e}\n"
-            }
+            raise ApiException(
+                f"Exception when calling AccountsApi->accounts_list: {e}\n"
+            )
         return api_response
 
     def get_transactions(
         self, modified_after: Optional[datetime] = None, cursor: Optional[str] = None
     ) -> dict:
-        accounts_params = {"x_account_token": self._x_account_token}
-        if modified_after:
-            accounts_params |= {"modified_after": modified_after}
-        if cursor:
-            accounts_params |= {"cursor": cursor}
+        """
+        Transactions retrieval service using the TransactionsApi implementation from merge.dev
+        """
+        transactions_params = self.build_query_params(
+            modified_after=modified_after, cursor=cursor
+        )
         try:
-            api_response = expenses_api.ExpensesApi(
+            api_response = transactions_api.TransactionsApi(
                 self._accounting_client
-            ).expenses_list(**accounts_params)
-            api_response_3 = transactions_api.TransactionsApi(
-                self._accounting_client
-            ).transactions_list(**accounts_params)
-            api_response_2 = income_statements_api.IncomeStatementsApi(
-                self._accounting_client
-            ).income_statements_list(**accounts_params)
+            ).transactions_list(**transactions_params)
         except ApiException as e:
-            api_response = {
-                "error": f"Exception when calling TransactionsApi->transactions_list: {e}\n"
-            }
-        print("TRANSACTIONS")
-        pprint(api_response_3["results"])
-        0 / 0
+            raise ApiException(
+                f"Exception when calling TransactionsApi->transactions_list: {e}\n"
+            )
         return api_response

@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date, datetime
+from pprint import pprint
 from typing import Optional
 
 from sqlalchemy.dialects.postgresql import insert
@@ -16,22 +17,23 @@ class AccountRepository:
     """
 
     def add_batch(self, account_values: list[dict]) -> None:
-        insert_stmt = insert(Account).values(account_values)
-        upsert_statement = insert_stmt.on_conflict_do_update(
-            index_elements=["remote_id"],
-            set_={
-                "created_at": insert_stmt.excluded.created_at,
-                "modified_at": insert_stmt.excluded.modified_at,
-                "name": insert_stmt.excluded.name,
-                "account_type": insert_stmt.excluded.account_type,
-                "classification": insert_stmt.excluded.classification,
-                "status": insert_stmt.excluded.status,
-                "current_balance": insert_stmt.excluded.current_balance,
-                "currency": insert_stmt.excluded.currency,
-            },
-        )
-        db_session.execute(upsert_statement)
-        db_session.commit()
+        if account_values:
+            insert_stmt = insert(Account).values(account_values)
+            upsert_statement = insert_stmt.on_conflict_do_update(
+                index_elements=["remote_id"],
+                set_={
+                    "created_at": insert_stmt.excluded.created_at,
+                    "modified_at": insert_stmt.excluded.modified_at,
+                    "name": insert_stmt.excluded.name,
+                    "account_type": insert_stmt.excluded.account_type,
+                    "classification": insert_stmt.excluded.classification,
+                    "status": insert_stmt.excluded.status,
+                    "current_balance": insert_stmt.excluded.current_balance,
+                    "currency": insert_stmt.excluded.currency,
+                },
+            )
+            db_session.execute(upsert_statement)
+            db_session.commit()
 
     def get(self, remote_id: str) -> Optional[Company]:
         query = db_session.query(Company).filter(Company.remote_id == remote_id)
@@ -48,29 +50,30 @@ class CompanyRepository:
     """
 
     def add_batch(self, company_values: list[dict]) -> None:
-        insert_stmt = insert(Company).values(company_values)
-        upsert_statement = insert_stmt.on_conflict_do_update(
-            index_elements=["remote_id"],
-            set_={
-                "created_at": insert_stmt.excluded.created_at,
-                "modified_at": insert_stmt.excluded.modified_at,
-                "legal_name": insert_stmt.excluded.legal_name,
-                "name": insert_stmt.excluded.name,
-                "tax_number": insert_stmt.excluded.tax_number,
-                "fiscal_year_end_day": insert_stmt.excluded.fiscal_year_end_day,
-                "fiscal_year_end_month": insert_stmt.excluded.fiscal_year_end_month,
-                "currency": insert_stmt.excluded.currency,
-            },
-        )
-        db_session.execute(upsert_statement)
-        db_session.commit()
+        if company_values:
+            insert_stmt = insert(Company).values(company_values)
+            upsert_statement = insert_stmt.on_conflict_do_update(
+                index_elements=["remote_id"],
+                set_={
+                    "created_at": insert_stmt.excluded.created_at,
+                    "modified_at": insert_stmt.excluded.modified_at,
+                    "legal_name": insert_stmt.excluded.legal_name,
+                    "name": insert_stmt.excluded.name,
+                    "tax_number": insert_stmt.excluded.tax_number,
+                    "fiscal_year_end_day": insert_stmt.excluded.fiscal_year_end_day,
+                    "fiscal_year_end_month": insert_stmt.excluded.fiscal_year_end_month,
+                    "currency": insert_stmt.excluded.currency,
+                },
+            )
+            db_session.execute(upsert_statement)
+            db_session.commit()
 
     def get(self, remote_id: str) -> Optional[Company]:
         query = db_session.query(Company).filter(Company.remote_id == remote_id)
         return query.first()
 
     def get_batch(self, remote_ids: list[int]):
-        query = db_session.query(Company).filter(Company.remote_id.in_(remote_ids))
+        query = db_session.query(Company).filter(Company.remote_id.in_(remote_ids))  # type: ignore
         return query.all()
 
 
@@ -86,7 +89,7 @@ class SyncStatusRepository:
         return sync_status
 
     def get(self) -> Optional[SyncStatus]:
-        query = db_session.query(SyncStatus).order_by(SyncStatus.last_sync_at.desc())
+        query = db_session.query(SyncStatus).order_by(SyncStatus.last_sync_at.desc())  # type: ignore
         return query.first()
 
 
@@ -96,19 +99,27 @@ class TransactionRepository:
     """
 
     def add_batch(self, transaction_values: list[dict]) -> None:
-        insert_stmt = insert(Transaction).values(transaction_values)
-        upsert_statement = insert_stmt.on_conflict_do_update(
-            index_elements=["remote_id"],
-            set_={
-                "created_at": insert_stmt.excluded.created_at,
-                "modified_at": insert_stmt.excluded.modified_at,
-                "name": insert_stmt.excluded.name,
-                "transaction_date": insert_stmt.excluded.transaction_date,
-                "transaction_to": insert_stmt.excluded.transaction_to,
-                "transaction_from": insert_stmt.excluded.transaction_from,
-                "amount": insert_stmt.excluded.amount,
-                "currency": insert_stmt.excluded.currency,
-            },
+        if transaction_values:
+            insert_stmt = insert(Transaction).values(transaction_values)
+            upsert_statement = insert_stmt.on_conflict_do_update(
+                index_elements=["remote_id"],
+                set_={
+                    "created_at": insert_stmt.excluded.created_at,
+                    "modified_at": insert_stmt.excluded.modified_at,
+                    "name": insert_stmt.excluded.name,
+                    "transaction_date": insert_stmt.excluded.transaction_date,
+                    "transaction_to": insert_stmt.excluded.transaction_to,
+                    "transaction_from": insert_stmt.excluded.transaction_from,
+                    "amount": insert_stmt.excluded.amount,
+                    "currency": insert_stmt.excluded.currency,
+                },
+            )
+            db_session.execute(upsert_statement)
+            db_session.commit()
+
+    def get_for_interval(self, start_date: date, end_date: date) -> list[Transaction]:
+        query = db_session.query(Transaction).filter(
+            Transaction.transaction_date <= end_date,
+            Transaction.transaction_date >= start_date,
         )
-        db_session.execute(upsert_statement)
-        db_session.commit()
+        return query.all()

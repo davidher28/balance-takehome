@@ -63,32 +63,32 @@ query {
 - Execute the unit tests session through ```pytest```:
 
 ```bash
-docker-compose run app pytest
+docker exec balance_takehome_app pytest
 ```
 
-- Execute the ```Black``` python formatter:
+- Execute the pre-configured ```Black``` python formatter:
 
 ```bash
-docker-compose run app black main.py app tests
+docker exec balance_takehome_app black main.py app tests
 ```
 
-- Execute the ```isort``` utility to manage imports across the app:
+- Execute the ```isort``` utility to manage imports:
 
 ```bash
-docker-compose run app isort main.py app tests
+docker exec balance_takehome_app isort main.py app tests
 ```
 
-- Execute the static type checking analysis using ```mypy```:
+- Execute a static type checking analysis using ```mypy```:
 
 ```bash
-docker-compose run app mypy main.py app tests
+docker exec balance_takehome_app mypy main.py app tests
 ```
 
 - After any database schema/tables change, you'd have to execute the following migration commands:
 
 ```bash
-docker-compose run app alembic revision --autogenerate
-docker-compose run app alembic upgrade head
+docker exec balance_takehome_app alembic revision --autogenerate
+docker exec balance_takehome_app alembic upgrade head
 ```
 
 ## Technologies / Tradeoffs
