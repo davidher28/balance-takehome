@@ -48,10 +48,10 @@ query {
 
 3.
 query {
-  transactionsForInterval(startDate:"2023-01-01", endDate:"2023-04-01") {
+  transactionsForInterval(startDate:"2023-03-01", endDate:"2023-03-21") {
     ... on TransactionsList {
       transactions {        
-        date
+        transactionDate
         name
         transactionTo
         transactionFrom
