@@ -62,6 +62,8 @@ query {
 }
 ```
 
+![alt text](https://github.com/davidher28/balance-takehome/blob/main/static/graphiql.png)
+
 ## Local Development
 
 - Execute the unit tests session through ```pytest```:
