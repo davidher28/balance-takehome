@@ -10,7 +10,7 @@ from app.graphql.schemas.transaction import TransactionsList
 from app.utils.formatter import FormatterUtil
 
 
-class BankQuery(ObjectType):
+class BanksQuery(ObjectType):
     bank_accounts = List(BankAccount)
 
     def resolve_bank_accounts(self, info):
@@ -36,7 +36,7 @@ class Query(ObjectType):
     )
 
     def resolve_balance_breakdown(self, info):
-        return [DateTimeType(), BankQuery.resolve_bank_accounts(None, info)]
+        return [DateTimeType(), BanksQuery.resolve_bank_accounts(None, info)]
 
     def resolve_income_and_expenses(self, info, month, year):
         return FormatterUtil().get_income_expense_schema(month, year)
