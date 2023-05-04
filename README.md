@@ -16,7 +16,7 @@ cd balance-takehome
 docker-compose up --build
 ```
 
-- Access pgAdmin to verify the schema creation and the ingested data:
+- Access pgAdmin through http://localhost:5050 to verify the schema creation and the ingested data:
 
 ![alt text](https://github.com/davidher28/balance-takehome/blob/main/static/pgAdmin2.png)
 
